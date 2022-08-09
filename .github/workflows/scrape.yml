@@ -1,0 +1,29 @@
+name: Scrape
+
+on:
+  workflow_dispatch:
+  push:
+  schedule:
+    - cron:  '2 17 * * *'
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Configure Git for commits
+      run: |-
+        git config user.name "Automated"
+        git config user.email "actions@users.noreply.github.com"
+    - name: Scrape installed packages
+      run: |-
+        apt list --installed > ubuntu-latest-installed.txt
+    - name: Commit and push if it changed
+      run: |-
+        git add -A
+        timestamp=$(date -u)
+        git commit -m "sqlite3: ${timestamp}" || exit 0
+        git push
